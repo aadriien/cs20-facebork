@@ -8,6 +8,9 @@
     <meta name="keywords" content="dogs, match, home, dogcare, tindog">
     <link rel="stylesheet" href="./stylesheets/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <!-- Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <style>
         #sidenav {display: none;}
         #topost {display: none;}
@@ -22,6 +25,40 @@
             var env = $.get('/imgur', (data) => {
                 //Yes, this is terrible practice, but I REALLY need this var
                 window.client = data.key;
+            })
+            var posts = $.get('/mongo/all', (data) => {
+                window.postJson = data.posts;
+                let htmlstr = '';
+                for (let i = (postJson.length - 1); i >= 0; i--) {
+                    let post = postJson[i];
+                    console.log(i)
+                    htmlstr += '<div class=card>'
+                        htmlstr += `<img src=${post.url}>`
+                        htmlstr += `<p><strong>${post.desc}</strong></p>`
+                        htmlstr += `<a href="#${i}" rel="modal:open">See comments</a>`
+                    htmlstr += '</div>'
+                    htmlstr += `<div class="modal card" id=${i}>`
+                        htmlstr += `<img src=${post.url}>`
+                        htmlstr += `<h3>${post.desc}</h3>`
+                        htmlstr += `<strong>Comments:</strong>`
+                        htmlstr += "<div class='comments'>"
+                            for (let comment of post.comments) {
+                                htmlstr += `<p>${comment}</p>`
+                            }
+                            if (post.comments.length === 0) {
+                                htmlstr += "<p>Be the first to add a comment!</p>"
+                            }
+                        htmlstr += "</div>"
+                        htmlstr += "<form action='/mongo/addComment' method='POST'>" 
+                                htmlstr += "<label for='comment'>Comment: </label>"
+                                htmlstr += "<input type='text' name='comment' id='comment'>"
+                                htmlstr += `<input type='hidden' name='imgId' id='imgId'
+                                             value=${post._id}><br>`
+                                htmlstr += `<button type="submit">Post Comment</submit>`
+                            htmlstr += "</form>"
+                    htmlstr += '</div>'
+                }
+                $(".postBlock").append(htmlstr);
             })
         });
         function menuslide () {
@@ -105,20 +142,36 @@
             <button id="closeMenu">&times;</button>
         </div>
     </header>
-    
+
     <div class="main">
-        <h1>Chat</h1>
-        <form>
-            <input type="file" name="file">
-        </form>
-        <img id='topost' src="" alt="">
-        <form action="mongo/new" method="POST">
-            <label for="desc">Caption:</label>
-            <input type="text" name="desc" id="desc">
-            <input id='url' type="hidden" name="url">
+        <div id="imgdiv">
+            <h1>Chat</h1>
+        </div>
+        <div id="postModal" class="modal">
+            <h2>New Post:</h2>
+            <form>
+                <input type="file" name="file">
+            </form>
             <br>
-            <button type="submit">Send to DB</button>
-        </form>
+            <div class="card">
+                <img id='topost' src="" alt="">
+            </div>
+            <br>
+            <form action="mongo/new" method="POST">
+                <label for="desc">Caption:</label>
+                <input type="text" name="desc" id="desc">
+                <input id='url' type="hidden" name="url">
+                <br>
+                <br>
+                <button class="post" type="submit" >Post</button>
+                <br>
+                <a href="#" class="button cancel" rel="modal:close">Cancel</a>
+            </form>
+        </div>
+
+        <a href="#postModal" class="button post" rel="modal:open"><strong>Post Your Pup!</strong></a>
+
+        <div class='postBlock'></div>
     </div>
 </body>
 </html>
