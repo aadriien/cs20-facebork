@@ -31,7 +31,7 @@
                 let htmlstr = '';
                 for (let i = (postJson.length - 1); i >= 0; i--) {
                     let post = postJson[i];
-                    console.log(i)
+                    //console.log(i)
                     htmlstr += '<div class=card>'
                         htmlstr += `<img src=${post.url}>`
                         htmlstr += `<p><strong>${post.desc}</strong></p>`
@@ -88,6 +88,9 @@
                 "Authorization": `Client-ID ${client}`
                 },
                 data: formData,
+                beforeSend: function() {
+                    $("#toppost").attr("src", "./images/loading.gif").show()
+                },
                 success: function(response) {
                 // console.log(response);
                     var photo = response.data.link;
@@ -99,6 +102,10 @@
                     };
                     reader.readAsDataURL(file[0]);
                     $("#topost").show();
+                },
+                error: function () {
+                    alert("Upload failed. Please try again.")
+                    $("#toppost").hide();
                 },
                 cache: false,
                 contentType: false,
@@ -150,7 +157,7 @@
         <div id="postModal" class="modal">
             <h2>New Post:</h2>
             <form>
-                <input type="file" name="file">
+                <input type="file" name="file" accept="image/png, image/jpeg, image/gif">
             </form>
             <br>
             <div class="card">
