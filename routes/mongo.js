@@ -1,13 +1,14 @@
 require('dotenv').config();
-var path = require('path')
+const { body } = require('express-validator');
 var express = require('express');
 var router = express.Router();
 var ObjectID = require('mongodb').ObjectID;
 
 /* Makes a new post */
-router.post('/new', async (req, res, next) => {
+router.post('/new', body('desc').escape(), async (req, res, next) => {
   let client = req.client;
   try {
+    if (req.body.url === "") throw new Error("Please include an image!")
     let insert = await insertPost(client, process.env.DB, "posts", {
       "url": req.body.url,
       "desc": req.body.desc,
@@ -15,6 +16,9 @@ router.post('/new', async (req, res, next) => {
     })
     res.redirect('/');
   } catch (e) {
+    if (e.message === "Please include an image!") {
+      res.status(422).send(`Please include an image! <a href='/'>Home</a>`)
+    }
     next(e)
   }
 });
@@ -29,7 +33,7 @@ router.get('/all', async (req, res, next) => {
   }
 });
 
-router.post('/addComment', async (req, res, next) => {
+router.post('/addComment', body('comment').escape(), async (req, res, next) => {
   let client = req.client;
   console.log(req.body);
   try {
