@@ -14,6 +14,7 @@
     <style>
         #sidenav {display: none;}
         #topost {display: none;}
+        #loading {display: none;}
     </style>
     <script>
         var openMenu = false;
@@ -72,6 +73,7 @@
             openMenu = !openMenu;
         }
         function postToImgur() {
+            $("#loading").show();
             var formData = new FormData();
             var file = $('input[type=file]').get(0).files;
             if (file === []) {
@@ -88,10 +90,8 @@
                 "Authorization": `Client-ID ${client}`
                 },
                 data: formData,
-                beforeSend: function() {
-                    $("#toppost").attr("src", "./images/loading.gif").show()
-                },
                 success: function(response) {
+                    $("#loading").hide();
                 // console.log(response);
                     var photo = response.data.link;
                     var photo_hash = response.data.deletehash;
@@ -106,6 +106,7 @@
                 error: function () {
                     alert("Upload failed. Please try again.")
                     $("#toppost").hide();
+                    $("#loading").hide();
                 },
                 cache: false,
                 contentType: false,
@@ -160,9 +161,8 @@
                 <input type="file" name="file" accept="image/png, image/jpeg, image/gif">
             </form>
             <br>
-            <div class="card">
                 <img id='topost' src="" alt="">
-            </div>
+                <img id='loading' src="./images/loading.gif">
             <br>
             <form action="mongo/new" method="POST">
                 <label for="desc">Caption:</label>
