@@ -271,7 +271,7 @@ h1 {
 .contentRow p {
     flex-wrap: wrap;
     font-size: 2vw;
-    margin-left: 2em; 
+    margin-left: 2em;
     margin-right: 2em;
 }
 
@@ -284,9 +284,84 @@ h1 {
 .contentRow img {
     margin-right: 2em;
     object-fit: contain;
-    max-width: 36vw; 
+    max-width: 36vw;
     max-height: 24vw;
 }
+
+/* About us Page */
+.slogan-container {
+    padding-top: 3em;
+    text-align: center;
+
+    color: #fff;
+}
+
+#slogan {
+  font-size: 80px;
+  font-weight: bold;
+  text-transform: uppercase;
+
+  margin-bottom: 5px;
+}
+
+#slogan-caption {
+  font-size: 25px;
+  font-weight: bold;
+
+  margin: 3px auto 25px;
+}
+
+.about-container {
+  margin: 8em auto 50px;
+  padding-top: 1em;
+  padding-bottom: 2em;
+  line-height: 2;
+
+  background-color: #0f5bb3;
+  text-align: center;
+}
+
+#profile-pics {
+  width: 252px;
+  height: 252px;
+  border-radius: 100%;
+
+  margin: 15px;
+}
+
+.bio-container {
+  background-color: #3c96fe;
+
+  text-align: center;
+  width: 80%;
+
+  margin: 0 auto 0;
+  border-radius: 25px;
+  padding: 2%;
+}
+
+#about-us-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.about-icon:hover {
+  color: #9ecffd;
+}
+
+/* Store */
+.store-container {
+  background-color: #3c96fe;
+
+  text-align: center;
+
+  width: 90%;
+
+  margin: 1.5% auto 0;
+  border-radius: 25px;
+  padding: 2%;
+}
+
 
 @media only screen and (max-width: 900px) {
     .contentRow{
@@ -305,7 +380,7 @@ h1 {
     .contentRow img {
         margin-right: 0;
         object-fit: contain;
-        max-width: 72vw; 
+        max-width: 72vw;
         max-height: 48vw;
     }
     .contentRowRev img {
