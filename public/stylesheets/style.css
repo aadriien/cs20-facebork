@@ -388,4 +388,14 @@ h1 {
         object-fit: contain;
         margin-right: 0;
     }
+
+    #slogan {
+      font-size: 60px;
+    }
+
+    #profile-pics {
+      width: 150px;
+      max-height: 150px;
+      height: 150px;
+    }
 }
