@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FaceBork</title>
     <meta name="keywords" content="dogs, match, home, dogcare, tindog">
-    <link rel="stylesheet" href="./stylesheets/style.css">
+    <link rel="stylesheet" href="..\stylesheets\style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <!-- Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
@@ -15,112 +15,76 @@
         #sidenav {display: none;}
         #topost {display: none;}
         #loading {display: none;}
+        #info {
+            padding: 1vh;
+            border: 5px solid #3c96fe;
+            border-radius: 1em;
+            background: #0f5bb3;
+        }
+         #slideshow {
+                float: right;
+                position: relative;
+                margin-top: 3em;
+                margin-right: 5em;
+                margin-left: 10em;
+                width: 24em;
+            }
+            @media only screen and (max-width: 896px) {
+                #slideshow {
+                    margin: auto auto;
+                    float: none;
+                    position: relative;
+                    width: 10em;
+                }
+            }
+            #slideshow img {
+                    width: inherit;
+                    border: solid 5px #3c96fe;
+                    border-radius: 1em;
+                    background-color: #fff;
+            }
     </style>
     <script>
+        //temporary setup for the slideshow
+        var placeDogs = [63, 65, 75, 121, 15]
+        var idx = 0
         var openMenu = false;
+        var srcString = "../images/"
         $(document).ready(() => {
             $("#hamburger").click(menuslide);
             $("#closeMenu").click(menuslide);
             $("#sidenav").slideUp();
-            $("input[type=file]").on("change", postToImgur);
-            var env = $.get('/imgur', (data) => {
-                //Yes, this is terrible practice, but I REALLY need this var
-                window.client = data.key;
-            })
-            var posts = $.get('/mongo/all', (data) => {
-                window.postJson = data.posts;
-                let htmlstr = '';
-                for (let i = (postJson.length - 1); i >= 0; i--) {
-                    let post = postJson[i];
-                    //console.log(i)
-                    htmlstr += '<div class=card>'
-                        htmlstr += `<img src=${post.url}>`
-                        htmlstr += `<p><strong>${post.desc}</strong></p>`
-                        htmlstr += `<a href="#${i}" rel="modal:open">See comments</a>`
-                    htmlstr += '</div>'
-                    htmlstr += `<div class="modal card" id=${i}>`
-                        htmlstr += `<img src=${post.url}>`
-                        htmlstr += `<h3>${post.desc}</h3>`
-                        htmlstr += `<strong>Comments:</strong>`
-                        htmlstr += "<div class='comments'>"
-                            for (let comment of post.comments) {
-                                htmlstr += `<p>${comment}</p>`
-                            }
-                            if (post.comments.length === 0) {
-                                htmlstr += "<p>Be the first to add a comment!</p>"
-                            }
-                        htmlstr += "</div>"
-                        htmlstr += "<form action='/mongo/addComment' method='POST'>" 
-                                htmlstr += "<label for='comment'>Comment: </label>"
-                                htmlstr += "<input type='text' name='comment' id='comment'>"
-                                htmlstr += `<input type='hidden' name='imgId' id='imgId'
-                                             value=${post._id}><br>`
-                                htmlstr += `<button type="submit">Post Comment</submit>`
-                            htmlstr += "</form>"
-                    htmlstr += '</div>'
-                }
-                $(".postBlock").append(htmlstr);
-            })
+            $("#slide").attr("src", "../images/15" + ".jpeg").delay(6000).fadeOut(1000, slideshow)
         });
+
         function menuslide () {
             if (!openMenu) {
-                $("#hamburger").attr("src", "./images/openmenu.png");
+                $("#hamburger").attr("src", "../images/openmenu.png");
                 $("#sidenav").slideDown()
             } else {
-                $("#hamburger").attr("src", "./images/menu.png");
+                $("#hamburger").attr("src", "../images/menu.png");
                 $("#sidenav").slideUp()
             }
             openMenu = !openMenu;
         }
-        function postToImgur() {
-            $("#loading").show();
-            var formData = new FormData();
-            var file = $('input[type=file]').get(0).files;
-            if (file === []) {
-                $("#topost").attr("src", "");
-                $("#topost").hide();
-                return false;
-            }
-            formData.append("image", file[0]);
-            $.ajax({
-                url: "https://api.imgur.com/3/image",
-                type: "POST",
-                datatype: "json",
-                headers: {
-                "Authorization": `Client-ID ${client}`
-                },
-                data: formData,
-                success: function(response) {
-                    $("#loading").hide();
-                // console.log(response);
-                    var photo = response.data.link;
-                    var photo_hash = response.data.deletehash;
-                    $("#url").val(photo)
-                    var reader = new FileReader();
-                    reader.onload = function(event) {
-                        document.getElementById("topost").src = event.target.result;
-                    };
-                    reader.readAsDataURL(file[0]);
-                    $("#topost").show();
-                },
-                error: function () {
-                    alert("Upload failed. Please try again.")
-                    $("#toppost").hide();
-                    $("#loading").hide();
-                },
-                cache: false,
-                contentType: false,
-                processData: false
-            });
-            return true;
+
+        //eventually will pull from mongo
+        function slideshow () {
+            console.log("in slide");
+            idx = (idx + 1) % 5
+            $("#slide").attr("src", srcString + placeDogs[idx] + ".jpeg")
+                       .fadeIn(1000, () => {
+                            $("#slide").delay(6000).fadeOut(1000, slideshow)
+                        })
         }
+        
     </script>
 </head>
 <body>
     <header>
         <div class="logoBar">
             <div class="box">
-                <a href="index.html"><img src="./images/logo.png"></a>
+                <a href="index.html"><img src="../images/logo.png"></a>
             </div>
             <div class="box">
                 <h3>FaceBork</h3>
@@ -128,10 +92,10 @@
         </div>
         <div class="nav">
             <div class="box">
-                <img id="hamburger" style="height: 2em" src="./images/menu.png">
+                <img id="hamburger" style="height: 2em" src="../images/menu.png">
             </div>
             <div class="box">
-                <a href="index.html"><h4>Chat</h4></a>
+                <a href="chat.html"><h4>Chat</h4></a>
             </div>
             <div class="box">
                 <a href="store.html"><h4>Barketplace</h4></a>
@@ -139,13 +103,18 @@
             <div class="box">
                 <a href="quiz.html"><h4>Quiz</h4></a>
             </div>
+            <div class="box">
+                <a href="https://www.patreon.com/facebork?fan_landing=true"> <img src="../images/patreon logo.png"> </a>
+            </div>
         </div>
         <div id="sidenav">
-            <a href="index.html">Chat</a>
+            <a href="chat.html">Chat</a>
             <br>
             <a href="store.html">Barketplace</a>
             <br>
             <a href="quiz.html">Quiz</a>
+            <br>
+            <a href="https://www.patreon.com/facebork?fan_landing=true"> <img src="../images/patreon logo.png"> </a>
             <br>
             <button id="closeMenu">&times;</button>
         </div>
@@ -153,32 +122,38 @@
 
     <div class="main">
         <div id="imgdiv">
-            <h1>Chat</h1>
+            <h1>Welcome!</h1>
         </div>
-        <div id="postModal" class="modal">
-            <h2>New Post:</h2>
-            <form>
-                <input type="file" name="file" accept="image/png, image/jpeg, image/gif">
-            </form>
-            <br>
-                <img id='topost' src="" alt="">
-                <img id='loading' src="./images/loading.gif">
-            <br>
-            <form action="mongo/new" method="POST">
-                <label for="desc">Caption:</label>
-                <input type="text" name="desc" id="desc">
-                <input id='url' type="hidden" name="url">
-                <br>
-                <br>
-                <button class="post" type="submit" >Post</button>
-                <br>
-                <a href="#" class="button cancel" rel="modal:close">Cancel</a>
-            </form>
+        <div class="text">
+            <div id="slideshow">
+                <img id="slide" src="">
+            </div>
         </div>
+        
+        1<div id="info">
+            <div class="contentRow">
+                <p>Welcome to Facebork, the #1 social media app for your dog!</p>
 
-        <a href="#postModal" class="button post" rel="modal:open"><strong>Post Your Pup!</strong></a>
+            </div>
 
-        <div class='postBlock'></div>
+            <div class="contentRow">
+                <p>Feel free to head over to our <a href="chat.html">chat</a> tab where you can view pictures from our wonderful community or post some your yourself!</p>
+            </div>
+
+            <div class="contentRow">
+                <p>Ever wondered what type of dog you would be? Well now you can find out with our personality quiz <a href="quiz.html">here!</a> </p>
+            </div>
+            
+             <div class="contentRow">
+                <p>Is your fluffy friend in need of a new toy? Check out our  <a href="store.html">barketplace</a> tab to find wonderful products handpicked by us! Don't forget to post a picture of your dog enjoying their new toy!</p>
+            </div>
+
+            <div class="contentRow">
+                <a href="https://www.patreon.com/facebork?fan_landing=true"> <img src="../images/patreon logo.png" class="donation"> </a>
+            </div>
+        </div>
+       
+        
     </div>
 </body>
 </html>

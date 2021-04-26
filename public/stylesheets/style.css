@@ -227,7 +227,15 @@ header {
   #sidenav a:hover {
       color: #fff;
   }
-
+  .donation {
+    margin: 0px;
+    margin-top: 1em;
+    padding-bottom: 2em;
+    height: 3.4em;
+    z-index: 99;
+    position: relative;
+    align-items: center;
+}
 
 .active, .accordion:hover {
   background-color: #fd9eb9;
