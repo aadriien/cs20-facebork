@@ -323,6 +323,7 @@ h1 {
 
 #profile-pics {
   width: 252px;
+  max-height: 252px;
   height: 252px;
   border-radius: 100%;
 
