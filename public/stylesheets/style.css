@@ -402,4 +402,12 @@ h1 {
     .navdonation {
       display: none;
     }
-}
+    #slogan {
+      font-size: 60px;
+    }
+
+    #profile-pics {
+      width: 150px;
+      max-height: 150px;
+      height: 150px;
+    }
