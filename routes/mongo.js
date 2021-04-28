@@ -33,6 +33,26 @@ router.get('/all', async (req, res, next) => {
   }
 });
 
+router.get('/quizQs/all', async (req, res, next) => {
+  let client = req.client;
+  try {
+    let data = await readCollection(client, process.env.DB, "quizQs", {})
+    res.send({"quizQs" : data});
+  } catch (e) {
+    next(e)
+  }
+});
+
+router.get('/tindogImages/all', async (req, res, next) => {
+  let client = req.client;
+  try {
+    let data = await readCollection(client, process.env.DB, "tindogImages", {})
+    res.send({"tindogImages" : data});
+  } catch (e) {
+    next(e)
+  }
+});
+
 router.post('/addComment', body('comment').escape(), async (req, res, next) => {
   let client = req.client;
   console.log(req.body);

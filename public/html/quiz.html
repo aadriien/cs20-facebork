@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FaceBork</title>
     <meta name="keywords" content="dogs, match, home, dogcare, tindog">
-    <link rel="stylesheet" href="./stylesheets/style.css">
+    <link rel="stylesheet" href="./comp20-facebork/public/stylesheets/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <!-- Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
@@ -95,34 +95,44 @@
     <br/><br/><br/><br/>
     
     
+    <div id="dogImage" style="color: #000; margin-left: 3em; font-size: 20px"></div>
+    
+
+    <br/><br/>
+    
+    
     
     <script language="javascript">
         function createQuiz() {
-            var output = [];
-            
-            quizQuestions.forEach((curr, questionNum) => {
-                var options = [];
+            // get data from MongoDB
+            var quizQs = $.get('/mongo/quizQs/all', (data) => {
+                window.quizQuestions = data.quizQs;
                 
-                for (choice in curr.options) {
-                    options.push(
-                    `<label>
-                    <input type = "radio" name = "question${questionNum}" value = "${choice}">
-                    ${curr.options[choice]}
-                    <br/>
-                    </label>`
-                    );
-                }
+                var output = [];
                 
-                output.push(
-                    `<div class="question" style="font-size: 20px"> ${curr.question} </div>
-                    <br/>
-                    <div class="choices"> ${options.join('')} </div>
-                    <br/><br/><br/>`
-                );                                    
-            });            
-            
-            //document.write(output);            
-            quizText.innerHTML = output.join('');            
+                quizQuestions.forEach((curr, questionNum) => {
+                    var options = [];
+                    
+                    for (choice in curr.options) {
+                        options.push(
+                        `<label>
+                        <input type = "radio" name = "question${questionNum}" value = "${choice}">
+                        ${curr.options[choice]}
+                        <br/>
+                        </label>`
+                        );
+                    }
+                    
+                    output.push(
+                        `<div class="question" style="font-size: 20px"> ${curr.question} </div>
+                        <br/>
+                        <div class="choices"> ${options.join('')} </div>
+                        <br/><br/><br/>`
+                    );                                    
+                });            
+           
+                quizText.innerHTML = output.join('');   
+            });         
         }
         
         
@@ -130,7 +140,7 @@
             // get answers from quiz
             var answerResults = quizText.querySelectorAll(".choices");
             
-            const dogBreeds = ["Labrador Retriever", "Beagle", "Chihuahua", 
+            const dogBreeds = ["Husky", "Beagle", "Chihuahua", 
             "Australian Shepherd", "Bernese Mountain Dog", "Bulldog", "Corgi",
             "Golden Retriever", "Poodle"];
             var breedCount = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -144,10 +154,7 @@
                 var selection = `input[name = question${questionNum}]:checked`;
                 var userAnswer = (answerChosen.querySelector(selection) || {}).value;
                 
-                //alert(userAnswer);
-                
                 var dogAnswer = curr.outcome[userAnswer];
-                //alert(dogAnswer);
                 
                 dogBreeds.forEach((currBreed, index) => {
                     if (dogAnswer == currBreed) {
@@ -171,6 +178,8 @@
                 
             });
             
+            var dogMatches = [];
+            
             var finalOutput = "Based on your quiz results, your best match is the... "
             + "<strong><em>" + dogBreeds[matchIndex] + "</em></strong>" + "!<br/><br/>";
             
@@ -178,119 +187,65 @@
             finalOutput += "<ul>";
             userSelection.forEach((dog) => {
                 finalOutput += `<li>${dog}</li>`;
+                dogMatches.push(dog);
             });
             finalOutput += "</ul>";
+            
+            finalOutput += `<br/><br/>But that's not all! Check out our other 
+            platform, <a href = 'https://awilli70.github.io/comp20-tindog/match.html' target = '_blank'>
+            TinDog</a>, to visit some of the pups shown below!<br/>`;
 
-            resultsText.innerHTML = finalOutput;
-    
+            resultsText.innerHTML = finalOutput;        
+            
+            // display TinDog images for breed matching
+            dogScript(dogMatches); 
         }
         
         
         
-        const quizQuestions = [
-            {
-                question: "How active are you?",
-                options: 
-                    {
-                        a: "I love to get outside and move around as much as possible!",
-                        b: "I enjoy light exercise, but staying at home is more my style.",
-                        c: "I'm a homebody through and through.",
-                    },
-                outcome:
-                    {
-                        a: "Labrador Retriever",
-                        b: "Beagle",
-                        c: "Chihuahua",
-                    }
-            },
-            {
-                question: "What level of engagement suits you best?",
-                options: 
-                    {
-                        a: "I'd like my dog to be full of energy.",
-                        b: "A little bit of excitement here and there sounds fun!",
-                        c: "I'd prefer a dog that is quiet and relaxed.",
-                    },
-                outcome:
-                    {
-                        a: "Australian Shepherd",
-                        b: "Bernese Mountain Dog",
-                        c: "Bulldog",
-                    }
-            },
-            {
-                question: "What's your home environment like?",
-                options: 
-                    {
-                        a: "I live by myself.",
-                        b: "I live with other adults and/or teenage children.",
-                        c: "I live with small children.",
-                    },
-                outcome:
-                    {
-                        a: "Corgi",
-                        b: "Beagle",
-                        c: "Golden Retriever",
-                    }
-            },
-            {
-                question: "How much time can you devote to a dog?",
-                options: 
-                    {
-                        a: "I'll be home often, so several hours each day.",
-                        b: "I'm gone during the day, but I have a handful of hours at home.",
-                        c: "I don't have much time at home.",
-                    },
-                outcome:
-                    {
-                        a: "Labrador Retriever",
-                        b: "Poodle",
-                        c: "Chihuahua",
-                    }
-            },
-            {
-                question: "How do you feel about grooming?",
-                options: 
-                    {
-                        a: "Fluffier dogs make for better cuddles!",
-                        b: "I can handle a bit of maintenance, but nothing extreme!",
-                        c: "I can't handle a dog that sheds.",
-                    },
-                outcome:
-                    {
-                        a: "Golden Retriever",
-                        b: "Bulldog",
-                        c: "Poodle",
-                    }
-            },
-            {
-                question: "How do you feel about size?",
-                options: 
-                    {
-                        a: "The bigger the dog, the better.",
-                        b: "I don't want a lapdog, but I don't want anything too huge.",
-                        c: "A small dog would be my best companion.",
-                    },
-                outcome:
-                    {
-                        a: "Bernese Mountain Dog",
-                        b: "Australian Shepherd",
-                        c: "Corgi",
-                    }            
-            }
-        ];
+        function dogScript(dogMatches) {
+            // get data from MongoDB
+            var tindogImages = $.get('/mongo/tindogImages/all', (data) => {
+                window.dogArr = data.tindogImages;
+            
+                var imageOutput = "";
+                
+                dogArr.forEach((d) => {
+                    dogMatches.forEach((dogMatch) => {
+                        if (dogMatch == d.breed) {
+                            imageOutput += `<div class="card" id='${d.name}'>
+                                            <img src="${d.img}">
+                                            <div class="info"> 
+                                            <h3 style="margin: 0 auto">${d.name}, ${d.age}</h3>
+                                                <div class="specifics">
+                                                    <p><strong>Breed:</strong> ${d.breed}</p>
+                                                    <p><strong>Size:</strong> ${d.size}</p>
+                                                    <p><strong>Demeanor:</strong> ${d.type}</p>
+                                                    <p><strong>Favorite Toy:</strong> ${d.favoriteToy}</p>
+                                                </div>
+                                            </div>
+                                        </div>`
+                        }    
+                    });            
+                });
+                tindogs.innerHTML = imageOutput;
+            });  
+        }   
+        
         
         
         var quizText = document.getElementById("quiz");
         var resultsText = document.getElementById("quizResults");
         var submitButton = document.getElementById("submit");
+        var tindogs = document.getElementById("dogImage");
         
         
         // get quiz structured
-        createQuiz();        
+        createQuiz();  
         
         // on submit, show results
-        submitButton.addEventListener("click", processResults);
+        submitButton.addEventListener("click", processResults); 
+        
         
         
     </script>
@@ -298,3 +253,4 @@
 </body>
 
 </html>
+
