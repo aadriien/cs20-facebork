@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceBork</title>
+    <meta name="keywords" content="dogs, match, home, dogcare, tindog">
+    <link rel="stylesheet" href="./stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <!-- Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+    <!-- FontAwesome icons -->
+    <script src="https://kit.fontawesome.com/2b687f3f0a.js" crossorigin="anonymous"></script>
+    <style>
+        #sidenav {display: none;}
+        #topost {display: none;}
+        #loading {display: none;}
+    </style>
+    <script>
+        var openMenu = false;
+        $(document).ready(() => {
+            $("#hamburger").click(menuslide);
+            $("#closeMenu").click(menuslide);
+            $("#sidenav").slideUp();
+            $("input[type=file]").on("change", postToImgur);
+            var env = $.get('/imgur', (data) => {
+                //Yes, this is terrible practice, but I REALLY need this var
+                window.client = data.key;
+            })
+            var posts = $.get('/mongo/all', (data) => {
+                window.postJson = data.posts;
+                let htmlstr = '';
+                for (let i = (postJson.length - 1); i >= 0; i--) {
+                    let post = postJson[i];
+                    //console.log(i)
+                    htmlstr += '<div class=card>'
+                        htmlstr += `<img src=${post.url}>`
+                        htmlstr += `<p><strong>${post.desc}</strong></p>`
+                        htmlstr += `<a href="#${i}" rel="modal:open">See comments</a>`
+                    htmlstr += '</div>'
+                    htmlstr += `<div class="modal card" id=${i}>`
+                        htmlstr += `<img src=${post.url}>`
+                        htmlstr += `<h3>${post.desc}</h3>`
+                        htmlstr += `<strong>Comments:</strong>`
+                        htmlstr += "<div class='comments'>"
+                            for (let comment of post.comments) {
+                                htmlstr += `<p>${comment}</p>`
+                            }
+                            if (post.comments.length === 0) {
+                                htmlstr += "<p>Be the first to add a comment!</p>"
+                            }
+                        htmlstr += "</div>"
+                        htmlstr += "<form action='/mongo/addComment' method='POST'>"
+                                htmlstr += "<label for='comment'>Comment: </label>"
+                                htmlstr += "<input type='text' name='comment' id='comment'>"
+                                htmlstr += `<input type='hidden' name='imgId' id='imgId'
+                                             value=${post._id}><br>`
+                                htmlstr += `<button type="submit">Post Comment</submit>`
+                            htmlstr += "</form>"
+                    htmlstr += '</div>'
+                }
+                $(".postBlock").append(htmlstr);
+            })
+        });
+        function menuslide () {
+            if (!openMenu) {
+                $("#hamburger").attr("src", "./images/openmenu.png");
+                $("#sidenav").slideDown()
+            } else {
+                $("#hamburger").attr("src", "./images/menu.png");
+                $("#sidenav").slideUp()
+            }
+            openMenu = !openMenu;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logoBar">
+            <div class="box">
+                <a href="index.html"><img src="./images/logo.png"></a>
+            </div>
+            <div class="box">
+                <h3>FaceBork</h3>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="box">
+                <img id="hamburger" style="height: 2em" src="./images/menu.png">
+            </div>
+            <div class="box">
+                <a href="index.html"><h4>Chat</h4></a>
+            </div>
+            <div class="box">
+                <a href="store.html"><h4>Barketplace</h4></a>
+            </div>
+            <div class="box">
+                <a href="quiz.html"><h4>Quiz</h4></a>
+            </div>
+            <div class="box">
+                <a href="about.html"><h4>About</h4></a>
+            </div>
+        </div>
+        <div id="sidenav">
+            <a href="index.html">Chat</a>
+            <br>
+            <a href="store.html">Barketplace</a>
+            <br>
+            <a href="quiz.html">Quiz</a>
+            <br>
+            <a href="about.html">About</a>
+            <br>
+            <button id="closeMenu">&times;</button>
+        </div>
+    </header>
+
+    <div class="main">
+        <div id="imgdiv">
+            <h1>About Us</h1>
+      </div>
+
+      <div class="slogan-container">
+        <p id='slogan'>Welcome to FaceBork!</p>
+        <p id='slogan-caption'>Let us introduce ourselves.</p>
+      </div>
+
+      <div class="about-container">
+        <div class="pic-container">
+          <img id="profile-pics" src="./images/larry.jpg" alt="">
+          <img id="profile-pics" src="./images/alex.png" alt="">
+          <img id="profile-pics" src="./images/adrien.png" alt="">
+          <img id="profile-pics" src="./images/ben.png" alt="">
+        </div>
+
+        <div class="bio-container">
+          <p id='about-us-text'>We <b>LOVE</b> dogs. </p>
+          <p id='about-us-text'>And we're sure you do too. So much so that
+            you've probably already heard of us (at TinDog)! We're a team of
+            programmers from Tufts University called <b>418 I'm a Teapot</b>.
+            With our passion for dogs and dogowners, our goal is to use our
+            web programming skills to connect all of us together through
+            a friendly and powerful social media platform. FaceBork is our
+            dream and we hope you will enjoy it!</p>
+          <i class="fas fa-dog fa-4x about-icon"></i>
+          <p id='about-us-text'>- Adrien Lynch, Ben McDermott, Alex
+          Williams, and Lawrence Xu</p>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

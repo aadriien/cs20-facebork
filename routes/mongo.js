@@ -14,7 +14,7 @@ router.post('/new', body('desc').escape(), async (req, res, next) => {
       "desc": req.body.desc,
       "comments": []
     })
-    res.redirect('/');
+    res.redirect('/chat.html');
   } catch (e) {
     if (e.message === "Please include an image!") {
       res.status(422).send(`Please include an image! <a href='/'>Home</a>`)
@@ -33,6 +33,26 @@ router.get('/all', async (req, res, next) => {
   }
 });
 
+router.get('/quizQs/all', async (req, res, next) => {
+  let client = req.client;
+  try {
+    let data = await readCollection(client, process.env.DB, "quizQs", {})
+    res.send({"quizQs" : data});
+  } catch (e) {
+    next(e)
+  }
+});
+
+router.get('/tindogImages/all', async (req, res, next) => {
+  let client = req.client;
+  try {
+    let data = await readCollection(client, process.env.DB, "tindogImages", {})
+    res.send({"tindogImages" : data});
+  } catch (e) {
+    next(e)
+  }
+});
+
 router.post('/addComment', body('comment').escape(), async (req, res, next) => {
   let client = req.client;
   console.log(req.body);
@@ -41,7 +61,7 @@ router.post('/addComment', body('comment').escape(), async (req, res, next) => {
     let comment = req.body.comment;
     let update = await findAndUpdate(client, process.env.DB, "posts", id,
                                     {"$push" : {"comments": comment}})
-    res.redirect('/');
+    res.redirect('/chat.html');
   } catch (e) {
     next(e)
   }
