@@ -228,6 +228,17 @@ header {
       color: #fff;
   }
 
+  .donation {
+    margin: 0px;
+    margin-top: 1em;
+    padding-bottom: 2em;
+    height: 3.4em;
+    z-index: 99;
+    position: relative;
+    align-items: center;
+  }
+
+
 
 .active, .accordion:hover {
   background-color: #fd9eb9;
@@ -265,7 +276,7 @@ h1 {
 @media only screen and (max-width: 360px) {
     h1 {
         font-size: large;
-    }
+    }    
 }
 
 .contentRow p {
@@ -311,5 +322,8 @@ h1 {
     .contentRowRev img {
         object-fit: contain;
         margin-right: 0;
+    }
+    .navdonation {
+      display: none;
     }
 }
