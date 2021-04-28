@@ -14,7 +14,7 @@ router.post('/new', body('desc').escape(), async (req, res, next) => {
       "desc": req.body.desc,
       "comments": []
     })
-    res.redirect('/chat');
+    res.redirect('/chat.html');
   } catch (e) {
     if (e.message === "Please include an image!") {
       res.status(422).send(`Please include an image! <a href='/'>Home</a>`)
@@ -61,7 +61,7 @@ router.post('/addComment', body('comment').escape(), async (req, res, next) => {
     let comment = req.body.comment;
     let update = await findAndUpdate(client, process.env.DB, "posts", id,
                                     {"$push" : {"comments": comment}})
-    res.redirect('/chat');
+    res.redirect('/chat.html');
   } catch (e) {
     next(e)
   }
