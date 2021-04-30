@@ -14,6 +14,34 @@
     <style>
         #sidenav {display: none;}
         #loading {display: none;}
+        
+        .specifics {
+                display: grid;
+                grid-template: auto auto / auto auto;
+            }
+            .specifics p {
+                margin: auto .2em;
+            }
+            .card {
+                border-radius: 1em;
+                margin: 0 auto 1em auto;
+                box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                background-color: #fff;
+                transition: 0.3s;
+                width: 20em;
+            }
+            .card img {
+                width: inherit;
+                border-radius: inherit;
+                max-width: initial;
+                max-height: initial;
+            }
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            }
+            .info {
+                padding: 2px 16px;
+            }
     </style>
     <script>
         var openMenu = false;
