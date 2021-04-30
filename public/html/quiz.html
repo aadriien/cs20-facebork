@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FaceBork</title>
     <meta name="keywords" content="dogs, match, home, dogcare, tindog">
-    <link rel="stylesheet" href="./comp20-facebork/public/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <!-- Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
@@ -28,7 +28,7 @@
                 box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
                 background-color: #fff;
                 transition: 0.3s;
-                width: 20em;
+                width: 18em;
             }
             .card img {
                 width: inherit;
@@ -67,7 +67,7 @@
     <header>
         <div class="logoBar">
             <div class="box">
-                <a href="index.html"><img src="./images/logo.png"></a>
+                <a href="index.html"><img src="../images/logo.png"></a>
             </div>
             <div class="box">
                 <h3>FaceBork</h3>
@@ -75,10 +75,13 @@
         </div>
         <div class="nav">
             <div class="box">
-                <img id="hamburger" style="height: 2em" src="./images/menu.png">
+                <img id="hamburger" style="height: 2em" src="../images/menu.png">
             </div>
             <div class="box">
-                <a href="index.html"><h4>Chat</h4></a>
+                <a href="index.html"><h4>Home</h4></a>
+            </div>
+            <div class="box">
+                <a href="chat.html"><h4>Chat</h4></a>
             </div>
             <div class="box">
                 <a href="store.html"><h4>Barketplace</h4></a>
@@ -86,13 +89,25 @@
             <div class="box">
                 <a href="quiz.html"><h4>Quiz</h4></a>
             </div>
+            <div class="box">
+                <a href="about.html"><h4>About</h4></a>
+            </div>
+            <div class="box">
+                <a href="https://www.patreon.com/facebork?fan_landing=true"> <img src="../images/patreon logo.png" class="navdonation"> </a>
+            </div>
         </div>
         <div id="sidenav">
-            <a href="index.html">Chat</a>
+            <a href="index.html">Home</a>
+            <br>
+            <a href="chat.html">Chat</a>
             <br>
             <a href="store.html">Barketplace</a>
             <br>
             <a href="quiz.html">Quiz</a>
+            <br>
+            <a href="about.html">About</a>
+            <br>
+            <a href="https://www.patreon.com/facebork?fan_landing=true" > <img src="../images/patreon logo.png" class="navdonation"> </a>
             <br>
             <button id="closeMenu">&times;</button>
         </div>
