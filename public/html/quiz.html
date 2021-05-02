@@ -14,6 +14,7 @@
     <style>
         #sidenav {display: none;}
         #loading {display: none;}
+        
         .specifics {
                 display: grid;
                 grid-template: auto auto / auto auto;
@@ -25,8 +26,9 @@
                 border-radius: 1em;
                 margin: 0 auto 1em auto;
                 box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                background-color: #fff;
                 transition: 0.3s;
-                width: 20em;
+                width: 18em;
             }
             .card img {
                 width: inherit;
@@ -40,7 +42,6 @@
             .info {
                 padding: 2px 16px;
             }
-
     </style>
     <script>
         var openMenu = false;
@@ -110,72 +111,130 @@
             <br>
             <button id="closeMenu">&times;</button>
         </div>
-    </header>
-    
+    </header>    
         
     
     
-    <br/><br/><br/><br/><br/>
-    <h1 style="font-size: 35px">Which dog breed is right for you?</h1>
+    <br/><br/><br/><br/><br/><br/><br/>
     
+    <div id="outputResults">
+        <div id="quizResults"></div>    
+        <div id="dogImage"></div>
+    </div>
     
+    <h1 id="header">Say Yup to the Pup!</h1>
     
-    <br/><br/>
+    <div id="error">Please select a choice.</div>  
     
-    <div id="quiz" style="color: #fff; margin-left: 3em"></div>
-    
-    
-    <br/>
-    <button id="submit" style = "margin-left: 3em">Find My Match!</button>
-    
-    <br/><br/><br/><br/>
-    
-    
-    <div id="quizResults" style="color: #fff; margin-left: 3em; font-size: 20px"></div>
+    <div id="quiz" style="color: #fff; margin-left: 3em"></div>    
 
-
-    <br/><br/><br/><br/>
+    <button id="Qbutton">Begin Quiz</button>
     
     
-    <div id="dogImage" style="color: #000;"></div>
     
-
-    <br/><br/>
+    <script>
+        var iterator = 0;
+        $('#Qbutton').hide();   
+        $('#error').hide();   
     
+        $(document).ready(() => {              
+            // get data from MongoDB
+            var quizQs = $.get('/mongo/quizQs/all', (data) => {
+                window.quizQuestions = data.quizQs; 
+                createQuiz();
+            });  
+            var tindogImages = $.get('/mongo/tindogImages/all', (data) => {
+                window.dogArr = data.tindogImages;
+            });
+            
+            // get questions on page, but start hidden
+            $('.fullQ').hide();
+            
+            $('#Qbutton').show();                    
+            $("#Qbutton").click(getNext);  
+        });        
+    </script>    
     
     
     <script language="javascript">
         function createQuiz() {
-            // get data from MongoDB
-            var quizQs = $.get('/mongo/quizQs/all', (data) => {
-                window.quizQuestions = data.quizQs;
+            var output = [];
+            
+            quizQuestions.forEach((curr, questionNum) => {
+                var options = [];
                 
-                var output = [];
+                for (choice in curr.options) {
+                    options.push(
+                    `<label>
+                    <input type = "radio" name = "question${questionNum}" value = "${choice}">
+                    ${curr.options[choice]}
+                    <br/>
+                    </label>`
+                    );
+                }
                 
-                quizQuestions.forEach((curr, questionNum) => {
-                    var options = [];
-                    
-                    for (choice in curr.options) {
-                        options.push(
-                        `<label>
-                        <input type = "radio" name = "question${questionNum}" value = "${choice}">
-                        ${curr.options[choice]}
-                        <br/>
-                        </label>`
-                        );
-                    }
-                    
-                    output.push(
-                        `<div class="question" style="font-size: 20px"> ${curr.question} </div>
-                        <br/>
-                        <div class="choices"> ${options.join('')} </div>
-                        <br/><br/><br/>`
-                    );                                    
-                });            
-           
-                quizText.innerHTML = output.join('');   
-            });         
+                output.push(
+                    `<div class="fullQ" style='display: none' id="${questionNum}">
+                    <div class="question"> ${curr.question} </div>
+                    <br/><br/>
+                    <div class="choices"> ${options.join('')} </div>
+                    </div>
+                    <br/><br/><br/>`
+                );                                    
+            });            
+                        
+            quizText.innerHTML = output.join('');            
         }
+        
+        
+        
+        function getNext() {    
+            $('#header').hide();
+                    
+            if (iterator > 0) {
+                // validate input (user has selected an option)
+                var answerResults = quizText.querySelectorAll(".choices");
+                var answerChosen = answerResults[iterator - 1];
+                var selection = `input[name = question${iterator - 1}]:checked`;
+                var userAnswer = (answerChosen.querySelector(selection) || {}).value;
+                
+                if (userAnswer != "0" && userAnswer != "1" && userAnswer != "2") {            
+                    $('#error').show();
+                }
+                else { // if no validation error, load next question
+                    $('#error').hide();
+                    
+                    if (button.innerHTML == "Submit Quiz") {
+                        $('.fullQ').hide(); 
+                        $('#Qbutton').hide();
+                        $('#header').hide();
+                        $('#quiz').hide();
+                        processResults();
+                    }
+                    else {
+                        // only show the current question
+                        $('.fullQ').hide();        
+                        $(`#${iterator}`).show();
+                        
+                        if (iterator == 5) {
+                            button.innerHTML = "Submit Quiz";
+                        }
+                        else {
+                            button.innerHTML = "Next Question";
+                        }
+                    }                   
+                    iterator++;                    
+                }    
+            }
+            else { // we're on the first question
+                $('.fullQ').hide();        
+                $('#0').show();
+                button.innerHTML = "Next Question";                      
+                
+                iterator++;
+            }    
+        }
+        
         
         
         function processResults() {
@@ -187,7 +246,6 @@
             "Golden Retriever", "Poodle"];
             var breedCount = [0, 0, 0, 0, 0, 0, 0, 0, 0];
             var userSelection = [];
-
 
             quizQuestions.forEach((curr, questionNum) => {                
 
@@ -203,12 +261,9 @@
                         breedCount[index]++;
                         if (!userSelection.includes(currBreed)) {
                             userSelection.push(currBreed);
-                        }
-                        
-                    }
-                    
-                });
-                
+                        }                        
+                    }                    
+                });                
             });
             
             var matchIndex = 0;
@@ -216,83 +271,70 @@
             breedCount.forEach((count, index) => {                
                 if (count > breedCount[matchIndex]) {
                     matchIndex = index;
-                }
-                
+                }                
             });
             
             var dogMatches = [];
             
             var finalOutput = "Based on your quiz results, your best match is the... "
-            + "<strong><em>" + dogBreeds[matchIndex] + "</em></strong>" + "!<br/><br/>";
+            + "<strong><em>" + dogBreeds[matchIndex] + "</em></strong>" + "!<br/><br/><br/>";
             
-            finalOutput += "During your quiz, you matched with the following dog breeds:";            
-            finalOutput += "<ul>";
+            finalOutput += `<div style="color: #9ecffd">During your quiz, you 
+            matched with the following dog breeds:</div><br/>`;            
+            
             userSelection.forEach((dog) => {
-                finalOutput += `<li>${dog}</li>`;
+                finalOutput += `${dog}<br/>`;
                 dogMatches.push(dog);
             });
-            finalOutput += "</ul>";
             
-            finalOutput += `<br/><br/>But that's not all! Check out our other 
+            finalOutput += `<br/><br/><div id="tindogLink">But that's not all! Check out our other 
             platform, <a href = 'https://awilli70.github.io/comp20-tindog/match.html' target = '_blank'>
-            TinDog</a>, to visit some of the pups shown below!<br/>`;
+            TinDog</a>, to visit some of the pups shown below!</div><br/>`;
 
             resultsText.innerHTML = finalOutput;        
             
             // display TinDog images for breed matching
             dogScript(dogMatches); 
         }
-        
+    
         
         
         function dogScript(dogMatches) {
-            // get data from MongoDB
-            var tindogImages = $.get('/mongo/tindogImages/all', (data) => {
-                window.dogArr = data.tindogImages;
+            var imageOutput = '<div class="allCards">';
             
-                var imageOutput = "";
-                
-                dogArr.forEach((d) => {
-                    dogMatches.forEach((dogMatch) => {
-                        if (dogMatch == d.breed) {
-                            imageOutput += `<div class="card" id='${d.name}'>
-                                            <img src="${d.img}">
-                                            <div class="info"> 
-                                            <h3 style="margin: 0 auto">${d.name}, ${d.age}</h3>
-                                                <div class="specifics">
-                                                    <p><strong>Breed:</strong> ${d.breed}</p>
-                                                    <p><strong>Size:</strong> ${d.size}</p>
-                                                    <p><strong>Demeanor:</strong> ${d.type}</p>
-                                                    <p><strong>Favorite Toy:</strong> ${d.favoriteToy}</p>
-                                                </div>
+            dogArr.forEach((d) => {
+                dogMatches.forEach((dogMatch) => {
+                    if (dogMatch == d.breed) {
+                        imageOutput += `<div class="card" id='${d.name}'>
+                                        <img src="${d.img}">
+                                        <div class="info"> 
+                                        <h3 style="margin: 0 auto">${d.name}, ${d.age}</h3>
+                                            <div class="specifics">
+                                                <p><strong>Breed:</strong> ${d.breed}</p>
+                                                <p><strong>Size:</strong> ${d.size}</p>
+                                                <p><strong>Demeanor:</strong> ${d.type}</p>
+                                                <p><strong>Favorite Toy:</strong> ${d.favoriteToy}</p>
                                             </div>
-                                        </div>`
-                        }    
-                    });            
+                                        </div>
+                                    </div>`
+                    }    
                 });
-                tindogs.innerHTML = imageOutput;
-            });  
-        }   
-        
-        
+                
+            });
+            imageOutput += "</div>";
+            tindogs.innerHTML = imageOutput;
+        }    
+            
         
         var quizText = document.getElementById("quiz");
         var resultsText = document.getElementById("quizResults");
-        var submitButton = document.getElementById("submit");
         var tindogs = document.getElementById("dogImage");
-        
-        
-        // get quiz structured
-        createQuiz();  
-        
-        // on submit, show results
-        submitButton.addEventListener("click", processResults); 
-        
-        
+        var button = document.getElementById("Qbutton");                
         
     </script>
     
 </body>
 
 </html>
+
 
