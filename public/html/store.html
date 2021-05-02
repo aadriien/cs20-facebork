@@ -15,6 +15,53 @@
         #sidenav {display: none;}
         #topost {display: none;}
         #loading {display: none;}
+
+        /* market cards */
+        /* a img {
+            height: initial;
+            width: initial;
+
+            margin-left: 0;
+        } */
+
+        .specifics {
+                display: grid;
+                grid-template: auto auto / auto auto;
+            }
+        .specifics p {
+            margin: auto .2em;
+        }
+        .card {
+            border-radius: 1em;
+            margin: 1.5em auto 1.5em auto;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            width: 20em;
+            /* height: 29em; */
+        }
+
+        .modal {
+            padding-top: 2em;
+        }
+
+        .card img {
+            width: inherit;
+            border-radius: inherit;
+            max-height: initial;
+            margin-left: 0;
+            height: initial;
+        }
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+        .info {
+            padding: 2px 16px;
+        }
+        .desc {
+            color: #848fa1;
+            vertical-align: middle;
+        }
+
     </style>
     <script>
         var openMenu = false;
@@ -22,44 +69,50 @@
             $("#hamburger").click(menuslide);
             $("#closeMenu").click(menuslide);
             $("#sidenav").slideUp();
-            $("input[type=file]").on("change", postToImgur);
             var env = $.get('/imgur', (data) => {
                 //Yes, this is terrible practice, but I REALLY need this var
                 window.client = data.key;
             })
-            var posts = $.get('/mongo/all', (data) => {
-                window.postJson = data.posts;
-                let htmlstr = '';
-                for (let i = (postJson.length - 1); i >= 0; i--) {
-                    let post = postJson[i];
-                    //console.log(i)
-                    htmlstr += '<div class=card>'
-                        htmlstr += `<img src=${post.url}>`
-                        htmlstr += `<p><strong>${post.desc}</strong></p>`
-                        htmlstr += `<a href="#${i}" rel="modal:open">See comments</a>`
-                    htmlstr += '</div>'
-                    htmlstr += `<div class="modal card" id=${i}>`
-                        htmlstr += `<img src=${post.url}>`
-                        htmlstr += `<h3>${post.desc}</h3>`
-                        htmlstr += `<strong>Comments:</strong>`
-                        htmlstr += "<div class='comments'>"
-                            for (let comment of post.comments) {
-                                htmlstr += `<p>${comment}</p>`
-                            }
-                            if (post.comments.length === 0) {
-                                htmlstr += "<p>Be the first to add a comment!</p>"
-                            }
-                        htmlstr += "</div>"
-                        htmlstr += "<form action='/mongo/addComment' method='POST'>"
-                                htmlstr += "<label for='comment'>Comment: </label>"
-                                htmlstr += "<input type='text' name='comment' id='comment'>"
-                                htmlstr += `<input type='hidden' name='imgId' id='imgId'
-                                             value=${post._id}><br>`
-                                htmlstr += `<button type="submit">Post Comment</submit>`
-                            htmlstr += "</form>"
-                    htmlstr += '</div>'
+
+            /* GET MARKET ARRAY */
+            var products = $.get('/mongo/marketplace', (data) => {
+                marketArray = data.products;
+
+                htmlstr = '';
+                for (i = 0; i < marketArray.length; i++) {
+                    product = marketArray[i];
+                    prodPrice = product.price
+
+
+                    htmlstr += `<a href="#${i}" rel="modal:open">
+                                <div class="card">
+                                      <img src="${product.img}">
+                                    <div class="info">
+                                    <h3 style="margin: 0 auto">${product.productName} : $${prodPrice.toFixed(2)}</h3>
+                                        <div>
+                                            <p><strong>Seller:</strong> ${product.brand}</p>
+                                            <p class="desc">${product.description}</p>
+                                        </div>
+                                    </div>
+                                </div></a>`
+
+                  /* handling modals */
+                  htmlstr += `<div class="modal modalCard" id=${i}>
+                                <div style="text-align: center;">
+                                    <img class="modalImg" src="${product.img}">
+                                </div>
+                                <h3 style="margin: 0 auto; text-align: center;">${product.productName}</h3>
+                                <h3 style="margin: 0 auto; text-align: center;">$${product.price}</h3>
+                                <div class="modalDesc">
+                                    <p><strong>Seller:</strong> ${product.brand}</p>
+                                    <p class="desc">${product.description}</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <button type="button" onclick="alert('Thank you for your purchase!');">Buy Now</button>
+                                </div>
+                              </div>`
                 }
-                $(".postBlock").append(htmlstr);
+                $(".store-container").html(htmlstr);
             })
         });
         function menuslide () {
@@ -72,6 +125,7 @@
             }
             openMenu = !openMenu;
         }
+
     </script>
 </head>
 <body>
@@ -129,12 +183,7 @@
             <h1>The Barketplace</h1>
         </div>
 
-        <!-- Todo: flexbox design? -->
         <div class="store-container">
-            Items will be displayed here!
-
-
-            <!-- WHEN ORDERING, USE MODAL - https://jquerymodal.com/ -->
         </div>
     </div>
 </body>
