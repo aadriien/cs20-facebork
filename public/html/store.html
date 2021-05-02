@@ -15,6 +15,48 @@
         #sidenav {display: none;}
         #topost {display: none;}
         #loading {display: none;}
+
+        /* market cards */
+        #marketCards {
+            margin: auto auto;
+            display: grid;
+            grid-template: auto / auto auto auto;
+        }
+        @media only screen and (max-width: 1060px) {
+            #marketCards {
+                grid-template: auto/ auto auto;
+            }
+        }
+        @media only screen and (max-width: 720px) {
+            #marketCards {
+                grid-template: auto/ auto;
+            }
+        }
+        .specifics {
+            display: grid;
+            grid-template: auto auto / auto auto;
+        }
+        .specifics p {
+            margin: auto .2em;
+        }
+        .item {
+            border-radius: 1em;
+            margin: 0 auto 1em auto;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            width: 20em;
+        }
+        .item img {
+            width: inherit;
+            border-radius: inherit;
+        }
+        .item:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+        .info {
+            padding: 2px 16px;
+        }
+
     </style>
     <script>
         var openMenu = false;
@@ -61,6 +103,32 @@
                 }
                 $(".postBlock").append(htmlstr);
             })
+
+            /* GET MARKET ARRAY */
+            var products = $.get('/mongo/marketplace', (data) => {
+                marketArray = data.products;
+                /* testing */
+                console.log(marketArray[0]);
+                console.log(marketArray[1]);
+
+                htmlstr = '';
+                for (i = 0; i < (marketArray.length - 1); i++) {
+                    product = marketArray[i];
+
+                    htmlstr += `<div class="item">
+                                    <img src="${product.img}">
+                                    <div class="info">
+                                    <h3 style="margin: 0 auto">${product.productName} : ${product.price}</h3>
+                                        <div class="desc">
+                                            <p><strong>Seller:</strong> ${product.brand}</p>
+                                            <p>${product.description}</p>
+                                        </div>
+                                    </div>
+                                </div>`
+                }
+                $(".store-container").html(htmlstr);
+            })
+
         });
         function menuslide () {
             if (!openMenu) {
@@ -71,6 +139,48 @@
                 $("#sidenav").slideUp()
             }
             openMenu = !openMenu;
+        }
+        function postToImgur() {
+            $("#loading").show();
+            var formData = new FormData();
+            var file = $('input[type=file]').get(0).files;
+            if (file === []) {
+                $("#topost").attr("src", "");
+                $("#topost").hide();
+                return false;
+            }
+            formData.append("image", file[0]);
+            $.ajax({
+                url: "https://api.imgur.com/3/image",
+                type: "POST",
+                datatype: "json",
+                headers: {
+                "Authorization": `Client-ID ${client}`
+                },
+                data: formData,
+                success: function(response) {
+                    $("#loading").hide();
+                // console.log(response);
+                    var photo = response.data.link;
+                    var photo_hash = response.data.deletehash;
+                    $("#url").val(photo)
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById("topost").src = event.target.result;
+                    };
+                    reader.readAsDataURL(file[0]);
+                    $("#topost").show();
+                },
+                error: function () {
+                    alert("Upload failed. Please try again.")
+                    $("#toppost").hide();
+                    $("#loading").hide();
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+            return true;
         }
     </script>
 </head>
@@ -121,8 +231,6 @@
 
         <!-- Todo: flexbox design? -->
         <div class="store-container">
-            Items will be displayed here!
-
 
             <!-- WHEN ORDERING, USE MODAL - https://jquerymodal.com/ -->
         </div>

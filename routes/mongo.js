@@ -47,6 +47,16 @@ router.post('/addComment', body('comment').escape(), async (req, res, next) => {
   }
 });
 
+router.get('/marketplace', async (req, res, next) => {
+  let client = req.client;
+  try {
+    let data = await readCollection(client, process.env.DB, "products", {})
+    res.send({"products" : data});
+  } catch (e) {
+    next(e)
+  }
+});
+
 
 // Helper: Inserts one post into the Mongo Database
 async function insertPost(client, database, collection, post) {
