@@ -141,13 +141,13 @@
             // get data from MongoDB
             var quizQs = $.get('/mongo/quizQs/all', (data) => {
                 window.quizQuestions = data.quizQs; 
+                createQuiz();
             });  
             var tindogImages = $.get('/mongo/tindogImages/all', (data) => {
                 window.dogArr = data.tindogImages;
             });
             
             // get questions on page, but start hidden
-            createQuiz();
             $('.fullQ').hide();
             
             $('#Qbutton').show();                    
@@ -174,7 +174,7 @@
                 }
                 
                 output.push(
-                    `<div class="fullQ" id="${questionNum}">
+                    `<div class="fullQ" style='display: none' id="${questionNum}">
                     <div class="question"> ${curr.question} </div>
                     <br/><br/>
                     <div class="choices"> ${options.join('')} </div>
@@ -198,7 +198,7 @@
                 var selection = `input[name = question${iterator - 1}]:checked`;
                 var userAnswer = (answerChosen.querySelector(selection) || {}).value;
                 
-                if (userAnswer != "a" && userAnswer != "b" && userAnswer != "c") {            
+                if (userAnswer != "0" && userAnswer != "1" && userAnswer != "2") {            
                     $('#error').show();
                 }
                 else { // if no validation error, load next question
