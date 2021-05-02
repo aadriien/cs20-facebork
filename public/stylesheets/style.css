@@ -218,8 +218,6 @@ body {
 .allCards {
     display: flex;
     flex-wrap: wrap;
-    margin: 2em;
-    padding: 5px;
     justify-content: space-between;
 }
 
