@@ -23,6 +23,20 @@ router.post('/new', body('desc').escape(), async (req, res, next) => {
   }
 });
 
+router.post('/submitorder', body('desc').escape(), async (req, res, next) => {
+  let client = req.client;
+  try {
+    let order = req.body
+    delete order.desc;
+
+    let insert = await insertPost(client, process.env.DB, "orders", order)
+
+    res.status(200).send;
+  } catch (e) {
+    next(e)
+  }
+});
+
 router.get('/all', async (req, res, next) => {
   let client = req.client;
   try {
