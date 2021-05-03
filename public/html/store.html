@@ -12,18 +12,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <style>
+        #donatebtn {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+            border-radius: .2em;
+            border: solid 2px #9ecffd;
+            padding: 4px 6px;
+            margin-top: .2em;
+            }
         #sidenav {display: none;}
         #topost {display: none;}
         #loading {display: none;}
-
-        /* market cards */
-        /* a img {
-            height: initial;
-            width: initial;
-
-            margin-left: 0;
-        } */
-
         .specifics {
                 display: grid;
                 grid-template: auto auto / auto auto;
@@ -69,6 +72,7 @@
             $("#hamburger").click(menuslide);
             $("#closeMenu").click(menuslide);
             $("#sidenav").slideUp();
+       		$(".warning").hide();
             var env = $.get('/imgur', (data) => {
                 //Yes, this is terrible practice, but I REALLY need this var
                 window.client = data.key;
@@ -102,19 +106,93 @@
                                     <img class="modalImg" src="${product.img}">
                                 </div>
                                 <h3 style="margin: 0 auto; text-align: center;">${product.productName}</h3>
-                                <h3 style="margin: 0 auto; text-align: center;">$${product.price}</h3>
+                                <h3 style="margin: 0 auto; text-align: center;">$${prodPrice.toFixed(2)}</h3>
                                 <div class="modalDesc">
                                     <p><strong>Seller:</strong> ${product.brand}</p>
                                     <p class="desc">${product.description}</p>
                                 </div>
                                 <div style="text-align: center;">
-                                    <button type="button" onclick="alert('Thank you for your purchase!');">Buy Now</button>
+                                    <div class="donationContainer">
+                                        <div class="donationForm">
+                                            <form name="info" id="info${i}">
+                                                <input type='hidden' class='prodName' name='item' value="${product.productName}">
+                                                &nbsp<label for="fname">First Name</label>
+                                                <div class="fname warning" hidden="true">*</div><br>
+                                                &nbsp<input type="text" inputmode="text" name="fname" class="fname" placeholder="John" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="lname">Last Name</label>
+                                                <div class="lname warning" hidden="true">*</div><br>
+                                                &nbsp<input type="text" inputmode="text" name="lname" class="lname" placeholder="Smith" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="email">Email</label>
+                                                <div class="email warning" hidden="true">*</div><br>
+                                                &nbsp<input type="email" name="email" class="email" placeholder="example@gmail.com" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="card">Credit Card</label>
+                                                <div class="card warning" hidden="true">*</div><br>
+                                                &nbsp<input type="tel" name="card" class="card" inputmode="numeric" placeholder="XXXX XXXX XXXX XXXX"  maxlength="19" pattern="[0-9\s]{13,19}" title="Use spaces" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="expDate">Expiration Date</label>
+                                                <div class="expDate warning" hidden="true">*</div><br>
+                                                &nbsp<input type="month" name="expDate"  class="expDate" max="2030-01" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="secCode">Security Code</label>
+                                                <div class="secCode warning" hidden="true">*</div><br>
+                                                &nbsp<input type="number" inputmode="numeric" name="secCode" class="secCode" inputmode="numeric" placeholder="XXX" required="true">
+                                                <br><br>
+                                                <a href="#" class="button" id="donatebtn" rel="modal:close" onclick="check('info' + ${i})">Buy Now!</a>
+                                            </form>
+                                            
+                                        </div>
+                                    
+                                    </div>
                                 </div>
                               </div>`
                 }
                 $(".store-container").html(htmlstr);
             })
         });
+
+        function check(formID) {
+			var form = document.getElementById(formID);
+            var d = new Date();
+            var expdate = form.expDate;	
+            var today = String(d.getFullYear()) + "-" + String(d.getMonth()+2).padStart(2,'0')
+            expdate.min = today;
+            console.log(form.elements)
+			if (validate_form(form)) {
+                let formElems = form.elements
+                let elemVals = []
+                for (let elem of formElems) {
+                    elemVals.push(elem.value)
+                }
+                let obj = {
+                    "itemName" : elemVals[0],
+                    "fname" : elemVals[1],
+                    "lname" : elemVals[2],
+                    "email" : elemVals[3],
+                    "ccard" : elemVals[4],
+                    "exp" : elemVals[5],
+                    "ccv" : elemVals[6]
+                }
+                console.log(elemVals)
+                $.ajax({
+                        type: 'POST',
+                        url: '/mongo/submitorder',
+                        data: obj,
+                        success: alert("Thank you for your order! We will send you more details later when your order is shipped.")
+                });
+			}
+			else {
+				alert("Please try again");
+			}
+			return true;
+		}
         function menuslide () {
             if (!openMenu) {
                 $("#hamburger").attr("src", "./images/openmenu.png");
@@ -126,6 +204,94 @@
             openMenu = !openMenu;
         }
 
+        function validate_form(form) {
+			var formValidity = true;
+			for (var i = 0; i < form.length-2; i++) {
+				elementClass = form[i].className;
+				elementValidity = validate_element(form[i]);
+				
+				if( elementValidity === false) {
+					$(elementClass).show();
+					formValidity = false;
+				}
+				else if (elementValidity === true) {
+					$(elementClass).hide();
+				}
+			}
+			return formValidity;
+		}
+
+		//Form element validation
+		function validate_element(input) {
+
+			var validityState = input.validity;
+			if (validityState.badInput == true) {
+				input.setCustomValidity('Uhhh something broke! Please try again');
+  				input.reportValidity();
+  				console.log('bad input');
+  				return false;
+			}
+			
+			else if (validityState.patternMismatch == true) {
+				input.setCustomValidity('Please enter your information following the pattern: ' + input.title + ' i.e. ' + input.placeholder);
+  				input.reportValidity();
+  				console.log('pattern mismatch');
+  				return false;
+			}
+			else if (validityState.rangeOverflow == true) {
+				input.setCustomValidity('The number you entered for ' + input.name + ' is too high. Please enter a number below ' + input.max);
+  				input.reportValidity();
+  				console.log('overflow');
+  				return false;
+			}
+			else if (validityState.rangeUnderflow == true) {
+				input.setCustomValidity('The number must be above ' + input.min);
+  				input.reportValidity();
+  				console.log('underflow');
+  				return false;
+			}
+			else if (validityState.rangeOverflow == true) {
+				input.setCustomValidity('The number must be below ' + input.max);
+  				input.reportValidity();
+  				console.log('overflow');
+  				return false;
+			}
+			else if (validityState.stepMismatch == true) {
+				input.setCustomValidity(input.value + ' is not divisbile by ' + input.step);
+  				input.reportValidity();
+  				console.log('step mismatch');
+  				return false;
+			}
+			else if (validityState.tooLong == true) {
+				input.setCustomValidity('Too much! Make your input shorter than ' + input.max);
+  				input.reportValidity();
+  				console.log('too long');
+  				return false;
+			}
+			else if (validityState.tooShort == true) {
+				input.setCustomValidity('Too little! Make your input longer than ' + input.min);
+  				input.reportValidity();
+  				console.log('too short');
+  				return false;
+			}
+			
+			else if (validityState.typeMismatch == true) {
+  				input.reportValidity();
+  				console.log('type mismatch');
+  				return false;
+			}
+			else if (validityState.valueMissing == true) {
+				input.setCustomValidity('This field is required');
+  				input.reportValidity();
+  				console.log('empty input');
+  				return false;
+			}
+			else {
+				input.setCustomValidity('');
+				input.reportValidity();
+				return true;
+			}
+		}
     </script>
 </head>
 <body>
