@@ -516,12 +516,12 @@ h1 {
   padding: 2%;
 }
 
-@media only screen and (max-width: 1060px) {
+@media only screen and (max-width: 1190px) {
     .store-container {
         grid-template: auto/ auto auto;
     }
 }
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 790px) {
     .store-container {
         grid-template: auto/ auto;
     }
