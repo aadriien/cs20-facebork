@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceBork</title>
+    <meta name="keywords" content="dogs, match, home, dogcare, tindog">
+    <link rel="stylesheet" href="./stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <!-- Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+    <style>
+        #donatebtn {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+            border-radius: .2em;
+            border: solid 2px #9ecffd;
+            padding: 4px 6px;
+            margin-top: .2em;
+            }
+        #sidenav {display: none;}
+        #topost {display: none;}
+        #loading {display: none;}
+        .specifics {
+                display: grid;
+                grid-template: auto auto / auto auto;
+            }
+        .specifics p {
+            margin: auto .2em;
+        }
+        .card {
+            border-radius: 1em;
+            margin: 1.5em auto 1.5em auto;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            width: 20em;
+            /* height: 29em; */
+        }
+
+        .modal {
+            padding-top: 2em;
+        }
+
+        .card img {
+            width: inherit;
+            border-radius: inherit;
+            max-height: initial;
+            margin-left: 0;
+            height: initial;
+        }
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+        .info {
+            padding: 2px 16px;
+        }
+        .desc {
+            color: #848fa1;
+            vertical-align: middle;
+        }
+
+    </style>
+    <script>
+        var openMenu = false;
+        $(document).ready(() => {
+            $("#hamburger").click(menuslide);
+            $("#closeMenu").click(menuslide);
+            $("#sidenav").slideUp();
+       		$(".warning").hide();
+            var env = $.get('/imgur', (data) => {
+                //Yes, this is terrible practice, but I REALLY need this var
+                window.client = data.key;
+            })
+
+            /* GET MARKET ARRAY */
+            var products = $.get('/mongo/marketplace', (data) => {
+                marketArray = data.products;
+
+                htmlstr = '';
+                for (i = 0; i < marketArray.length; i++) {
+                    product = marketArray[i];
+                    prodPrice = product.price
+
+
+                    htmlstr += `<a href="#${i}" rel="modal:open">
+                                <div class="card">
+                                      <img src="${product.img}">
+                                    <div class="info">
+                                    <h3 style="margin: 0 auto">${product.productName} : $${prodPrice.toFixed(2)}</h3>
+                                        <div>
+                                            <p><strong>Seller:</strong> ${product.brand}</p>
+                                            <p class="desc">${product.description}</p>
+                                        </div>
+                                    </div>
+                                </div></a>`
+
+                  /* handling modals */
+                  htmlstr += `<div class="modal modalCard" id=${i}>
+                                <div style="text-align: center;">
+                                    <img class="modalImg" src="${product.img}">
+                                </div>
+                                <h3 style="margin: 0 auto; text-align: center;">${product.productName}</h3>
+                                <h3 style="margin: 0 auto; text-align: center;">$${prodPrice.toFixed(2)}</h3>
+                                <div class="modalDesc">
+                                    <p><strong>Seller:</strong> ${product.brand}</p>
+                                    <p class="desc">${product.description}</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div class="donationContainer">
+                                        <div class="donationForm">
+                                            <form name="info" id="info${i}">
+                                                <input type='hidden' class='prodName' name='item' value="${product.productName}">
+                                                &nbsp<label for="fname">First Name</label>
+                                                <div class="fname warning" hidden="true">*</div><br>
+                                                &nbsp<input type="text" inputmode="text" name="fname" class="fname" placeholder="John" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="lname">Last Name</label>
+                                                <div class="lname warning" hidden="true">*</div><br>
+                                                &nbsp<input type="text" inputmode="text" name="lname" class="lname" placeholder="Smith" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="email">Email</label>
+                                                <div class="email warning" hidden="true">*</div><br>
+                                                &nbsp<input type="email" name="email" class="email" placeholder="example@gmail.com" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="card">Credit Card</label>
+                                                <div class="card warning" hidden="true">*</div><br>
+                                                &nbsp<input type="tel" name="card" class="card" inputmode="numeric" placeholder="XXXX XXXX XXXX XXXX"  maxlength="19" pattern="[0-9\s]{13,19}" title="Use spaces" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="expDate">Expiration Date</label>
+                                                <div class="expDate warning" hidden="true">*</div><br>
+                                                &nbsp<input type="month" name="expDate"  class="expDate" max="2030-01" required="true">
+                                                <br><br>
+
+                                                &nbsp<label for="secCode">Security Code</label>
+                                                <div class="secCode warning" hidden="true">*</div><br>
+                                                &nbsp<input type="number" inputmode="numeric" name="secCode" class="secCode" inputmode="numeric" placeholder="XXX" required="true">
+                                                <br><br>
+                                                <a href="#" class="button" id="donatebtn" rel="modal:close" onclick="check('info' + ${i})">Buy Now!</a>
+                                            </form>
+                                            
+                                        </div>
+                                    
+                                    </div>
+                                </div>
+                              </div>`
+                }
+                $(".store-container").html(htmlstr);
+            })
+        });
+
+        function check(formID) {
+			var form = document.getElementById(formID);
+            var d = new Date();
+            var expdate = form.expDate;	
+            var today = String(d.getFullYear()) + "-" + String(d.getMonth()+2).padStart(2,'0')
+            expdate.min = today;
+            console.log(form.elements)
+			if (validate_form(form)) {
+                let formElems = form.elements
+                let elemVals = []
+                for (let elem of formElems) {
+                    elemVals.push(elem.value)
+                }
+                let obj = {
+                    "itemName" : elemVals[0],
+                    "fname" : elemVals[1],
+                    "lname" : elemVals[2],
+                    "email" : elemVals[3],
+                    "ccard" : elemVals[4],
+                    "exp" : elemVals[5],
+                    "ccv" : elemVals[6]
+                }
+                console.log(elemVals)
+                $.ajax({
+                        type: 'POST',
+                        url: '/mongo/submitorder',
+                        data: obj,
+                        success: alert("Thank you for your order! We will send you more details later when your order is shipped.")
+                });
+			}
+			else {
+				alert("Please try again");
+			}
+			return true;
+		}
+        function menuslide () {
+            if (!openMenu) {
+                $("#hamburger").attr("src", "./images/openmenu.png");
+                $("#sidenav").slideDown()
+            } else {
+                $("#hamburger").attr("src", "./images/menu.png");
+                $("#sidenav").slideUp()
+            }
+            openMenu = !openMenu;
+        }
+
+        function validate_form(form) {
+			var formValidity = true;
+			for (var i = 0; i < form.length-2; i++) {
+				elementClass = form[i].className;
+				elementValidity = validate_element(form[i]);
+				
+				if( elementValidity === false) {
+					$(elementClass).show();
+					formValidity = false;
+				}
+				else if (elementValidity === true) {
+					$(elementClass).hide();
+				}
+			}
+			return formValidity;
+		}
+
+		//Form element validation
+		function validate_element(input) {
+
+			var validityState = input.validity;
+			if (validityState.badInput == true) {
+				input.setCustomValidity('Uhhh something broke! Please try again');
+  				input.reportValidity();
+  				console.log('bad input');
+  				return false;
+			}
+			
+			else if (validityState.patternMismatch == true) {
+				input.setCustomValidity('Please enter your information following the pattern: ' + input.title + ' i.e. ' + input.placeholder);
+  				input.reportValidity();
+  				console.log('pattern mismatch');
+  				return false;
+			}
+			else if (validityState.rangeOverflow == true) {
+				input.setCustomValidity('The number you entered for ' + input.name + ' is too high. Please enter a number below ' + input.max);
+  				input.reportValidity();
+  				console.log('overflow');
+  				return false;
+			}
+			else if (validityState.rangeUnderflow == true) {
+				input.setCustomValidity('The number must be above ' + input.min);
+  				input.reportValidity();
+  				console.log('underflow');
+  				return false;
+			}
+			else if (validityState.rangeOverflow == true) {
+				input.setCustomValidity('The number must be below ' + input.max);
+  				input.reportValidity();
+  				console.log('overflow');
+  				return false;
+			}
+			else if (validityState.stepMismatch == true) {
+				input.setCustomValidity(input.value + ' is not divisbile by ' + input.step);
+  				input.reportValidity();
+  				console.log('step mismatch');
+  				return false;
+			}
+			else if (validityState.tooLong == true) {
+				input.setCustomValidity('Too much! Make your input shorter than ' + input.max);
+  				input.reportValidity();
+  				console.log('too long');
+  				return false;
+			}
+			else if (validityState.tooShort == true) {
+				input.setCustomValidity('Too little! Make your input longer than ' + input.min);
+  				input.reportValidity();
+  				console.log('too short');
+  				return false;
+			}
+			
+			else if (validityState.typeMismatch == true) {
+  				input.reportValidity();
+  				console.log('type mismatch');
+  				return false;
+			}
+			else if (validityState.valueMissing == true) {
+				input.setCustomValidity('This field is required');
+  				input.reportValidity();
+  				console.log('empty input');
+  				return false;
+			}
+			else {
+				input.setCustomValidity('');
+				input.reportValidity();
+				return true;
+			}
+		}
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logoBar">
+            <div class="box">
+                <a href="index.html"><img src="../images/logo.png"></a>
+            </div>
+            <div class="box">
+                <h3>FaceBork</h3>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="box">
+                <img id="hamburger" style="height: 2em" src="../images/menu.png">
+            </div>
+            <div class="box">
+                <a href="index.html"><h4>Home</h4></a>
+            </div>
+            <div class="box">
+                <a href="chat.html"><h4>Chat</h4></a>
+            </div>
+            <div class="box">
+                <a href="store.html"><h4>Barketplace</h4></a>
+            </div>
+            <div class="box">
+                <a href="quiz.html"><h4>Quiz</h4></a>
+            </div>
+            <div class="box">
+                <a href="about.html"><h4>About</h4></a>
+            </div>
+            <div class="box">
+                <a href="https://www.patreon.com/facebork?fan_landing=true"> <img src="../images/patreon logo.png" class="navdonation"> </a>
+            </div>
+        </div>
+        <div id="sidenav">
+            <a href="index.html">Home</a>
+            <br>
+            <a href="chat.html">Chat</a>
+            <br>
+            <a href="store.html">Barketplace</a>
+            <br>
+            <a href="quiz.html">Quiz</a>
+            <br>
+            <a href="about.html">About</a>
+            <br>
+            <a href="https://www.patreon.com/facebork?fan_landing=true" > <img src="../images/patreon logo.png" class="navdonation"> </a>
+            <br>
+            <button id="closeMenu">&times;</button>
+        </div>
+    </header>
+
+    <div class="main">
+        <div id="imgdiv">
+            <h1>The Barketplace</h1>
+        </div>
+
+        <div class="store-container">
+        </div>
+    </div>
+</body>
+</html>
